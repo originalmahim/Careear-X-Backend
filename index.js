@@ -42,6 +42,20 @@ app.get('/alljobs/:postedPersonEmail/:id', async(req,res) => {
   const result = await jobsFile.findOne(queary)
   res.send(result)
 })
+app.get('/alljobs/:postedPersonEmail/:id', async(req,res) => {
+  const email = req.params.postedPersonEmail;
+  const id = req.params.id
+  const queary = {_id: new ObjectId(id), postedPersonEmail: email}
+  const result = await jobsFile.findOne(queary)
+  res.send(result)
+})
+app.delete('/alljobs/:postedPersonEmail/:id', async(req,res) => {
+  const email = req.params.postedPersonEmail;
+  const id = req.params.id
+  const queary = {_id: new ObjectId(id), postedPersonEmail: email}
+  const result = await jobsFile.deleteOne(queary)
+  res.send(result)
+})
 
 
 app.get('/', (req, res) => {

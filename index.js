@@ -30,6 +30,11 @@ app.post('/alljobs', async(req,res) => {
   const result = await jobsFile.insertOne(job)
   res.send(result)
 })
+app.get('/alljobs/:postedPersonEmail', async(req,res) => {
+  const email = req.params.postedPersonEmail;
+  const result = await jobsFile.find({ postedPersonEmail: email }).toArray();
+  res.send(result)
+})
 
 app.get('/', (req, res) => {
   res.send('Hello World!')

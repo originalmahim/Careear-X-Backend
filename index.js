@@ -19,17 +19,12 @@ const client = new MongoClient(uri, {
   }
 });
 
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-  }
-}
-run().catch(console.dir);
+const jobsFile = client.db('JobsFile').collection('JobsCollection')
+
+app.get('/alljobs', async(req,res) => {
+    const jobs = await jobsFile.find().toArray();
+    res.send(jobs)
+})
 
 
 app.get('/', (req, res) => {

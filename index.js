@@ -7,7 +7,7 @@ app.use(express.json())
 app.use(cors())
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.eqvmyxo.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -35,6 +35,14 @@ app.get('/alljobs/:postedPersonEmail', async(req,res) => {
   const result = await jobsFile.find({ postedPersonEmail: email }).toArray();
   res.send(result)
 })
+app.get('/alljobs/:postedPersonEmail/:id', async(req,res) => {
+  const email = req.params.postedPersonEmail;
+  const id = req.params.id
+  const queary = {_id: new ObjectId(id), postedPersonEmail: email}
+  const result = await jobsFile.findOne(queary)
+  res.send(result)
+})
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!')

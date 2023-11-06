@@ -25,7 +25,11 @@ app.get('/alljobs', async(req,res) => {
     const jobs = await jobsFile.find().toArray();
     res.send(jobs)
 })
-
+app.post('/alljobs', async(req,res) => {
+  const job = req.body;
+  const result = await jobsFile.insertOne(job)
+  res.send(result)
+})
 
 app.get('/', (req, res) => {
   res.send('Hello World!')

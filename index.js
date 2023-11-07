@@ -49,6 +49,11 @@ app.get('/alljobs/:postedPersonEmail', async(req,res) => {
   const result = await jobsFile.find({ postedPersonEmail: email }).toArray();
   res.send(result)
 })
+app.get('/appliedJob/:applicantEmail', async(req,res) => {
+  const email = req.params.applicantEmail;
+  const result = await appliedFile.find({ applicantEmail: email }).toArray();
+  res.send(result)
+})
 app.get('/alljobs/:postedPersonEmail/:id', async(req,res) => {
   const email = req.params.postedPersonEmail;
   const id = req.params.id

@@ -27,7 +27,7 @@ app.get('/alljobs', async(req,res) => {
     res.send(jobs)
 })
 app.get('/appliedJob', async(req,res) => {
-  const jobs = await jobsFile.find().toArray();
+  const jobs = await appliedFile.find().toArray();
     res.send(jobs)
 })
 app.get('/jobs', async(req,res) => {
@@ -37,6 +37,11 @@ app.get('/jobs', async(req,res) => {
 app.post('/alljobs', async(req,res) => {
   const job = req.body;
   const result = await jobsFile.insertOne(job)
+  res.send(result)
+})
+app.post('/appliedJob', async(req,res) => {
+  const job = req.body;
+  const result = await appliedFile.insertOne(job)
   res.send(result)
 })
 app.get('/alljobs/:postedPersonEmail', async(req,res) => {

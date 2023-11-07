@@ -20,9 +20,14 @@ const client = new MongoClient(uri, {
 });
 
 const jobsFile = client.db('JobsFile').collection('JobsCollection')
+const appliedFile = client.db('appliedFile').collection('appliedCollection')
 
 app.get('/alljobs', async(req,res) => {
     const jobs = await jobsFile.find().toArray();
+    res.send(jobs)
+})
+app.get('/appliedJob', async(req,res) => {
+  const jobs = await jobsFile.find().toArray();
     res.send(jobs)
 })
 app.get('/jobs', async(req,res) => {

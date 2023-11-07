@@ -77,6 +77,41 @@ app.delete('/alljobs/:postedPersonEmail/:id', async(req,res) => {
 })
 
 
+
+app.put('/alljobs/:postedPersonEmail/:id', async (req, res) => {
+  const email = req.params.postedPersonEmail;
+  const id = req.params.id;
+  const product = req.body;
+  const options = { usert: true }
+  const filter = { _id: new ObjectId(id), postedPersonEmail: email };
+  const update = {
+    $set: {
+      productName: product.category,
+      brandImg: product.brandImg,
+      responsibilities: product.responsibilities,
+      EducationQualifications: product.EducationQualifications,
+      email: product.email,
+      headquarters: product.headquarters,
+      officeImg: product.officeImg,
+      Description: product.Description,
+      employer: product.employer,
+      jobTitle: product.jobTitle,
+      jobType: product.jobType,
+      postingDate: product.postingDate,
+      deadline: product.deadline,
+      salary: product.salary,
+      postedBy: product.postedBy,
+      postedPersonEmail: product.postedPersonEmail,
+      totalVacancy: product.totalVacancy,
+      }
+      }
+      const result = await jobsFile.updateOne(filter,update,options)
+  res.send(result)
+      })
+
+
+
+
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })

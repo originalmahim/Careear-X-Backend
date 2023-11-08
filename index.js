@@ -30,7 +30,19 @@ const client = new MongoClient(uri, {
 const jobsFile = client.db('JobsFile').collection('JobsCollection')
 const appliedFile = client.db('appliedFile').collection('appliedCollection')
 
-
+const verifyToken = (req, res, next) =>{
+  const token = req?.cookies?.token;
+  if(!token){
+      return res.status(401).send({message: 'unauthorized access'})
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
+      if(err){
+          return res.status(401).send({message: 'unauthorized access'})
+      }
+      req.user = decoded;
+      next();
+  })
+}
 
 app.get('/alljobs', async(req,res) => {
     const jobs = await jobsFile.find().toArray();
@@ -54,7 +66,7 @@ app.post('/appliedJob', async(req,res) => {
   const result = await appliedFile.insertOne(job)
   res.send(result)
 })
-app.get('/alljobs/:postedPersonEmail', async(req,res) => {
+app.get('/alljobs/:postedPersonEmail', verifyToken ,  async(req,res) => {
   const email = req.params.postedPersonEmail;
   const result = await jobsFile.find({ postedPersonEmail: email }).toArray();
   res.send(result)
@@ -119,17 +131,18 @@ app.put('/alljobs/:postedPersonEmail/:id', async (req, res) => {
         res.send(result)
       })
 
-      app.post('/jwt' , async(req,res) => {
+      app.post('/jwt', async (req, res) => {
         const user = req.body;
-        const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{
-          expiresIn: '1h'
+        console.log('user for token', user);
+        const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
         })
-        res.cookie('token', token,{
-          httpOnly: true,
-          secure: true
-        } )
-        .send({massage : true})
-      })
+            .send({ success: true });
+    })
 
 
 

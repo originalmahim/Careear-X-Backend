@@ -8,6 +8,8 @@ require('dotenv').config()
 app.use(cors({
   origin: [
     'http://localhost:5173',
+    'https://bdcareer-x.web.app',
+    'https://bdcareer-x.firebaseapp.com'
   ],
   credentials: true,
 }))

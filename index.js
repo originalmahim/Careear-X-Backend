@@ -17,92 +17,92 @@ app.use(cookieParser())
 app.use(express.json())
 
 
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.eqvmyxo.mongodb.net/?retryWrites=true&w=majority`;
+  const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+  const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.eqvmyxo.mongodb.net/?retryWrites=true&w=majority`;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
+  // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+  const client = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
+
+  const jobsFile = client.db('JobsFile').collection('JobsCollection')
+  const appliedFile = client.db('appliedFile').collection('appliedCollection')
+
+  const verifyToken = (req, res, next) =>{
+    const token = req?.cookies?.token;
+    if(!token){
+        return res.status(401).send({message: 'unauthorized access'})
+    }
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
+        if(err){
+            return res.status(401).send({message: 'unauthorized access'})
+        }
+        req.user = decoded;
+        next();
+    })
   }
-});
 
-const jobsFile = client.db('JobsFile').collection('JobsCollection')
-const appliedFile = client.db('appliedFile').collection('appliedCollection')
-
-const verifyToken = (req, res, next) =>{
-  const token = req?.cookies?.token;
-  if(!token){
-      return res.status(401).send({message: 'unauthorized access'})
-  }
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
-      if(err){
-          return res.status(401).send({message: 'unauthorized access'})
-      }
-      req.user = decoded;
-      next();
+  app.get('/alljobs', async(req,res) => {
+      const jobs = await jobsFile.find().toArray();
+      res.send(jobs)
   })
-}
+  app.get('/appliedJob', async(req,res) => {
+    const jobs = await appliedFile.find().toArray();
+      res.send(jobs)
+  })
+  app.get('/jobs', async(req,res) => {
+      const jobs = await jobsFile.find().toArray();
+      res.send(jobs)
+  })
+  app.post('/alljobs', async(req,res) => {
+    const job = req.body;
+    const result = await jobsFile.insertOne(job)
+    res.send(result)
+  })
+  app.post('/appliedJob', async(req,res) => {
+    const job = req.body;
+    const result = await appliedFile.insertOne(job)
+    res.send(result)
+  })
+  app.get('/alljobs/:postedPersonEmail', verifyToken ,  async(req,res) => {
+    const email = req.params.postedPersonEmail;
+    const result = await jobsFile.find({ postedPersonEmail: email }).toArray();
+    res.send(result)
+  })
+  app.get('/appliedJob/:applicantEmail', verifyToken , async(req,res) => {
+    const email = req.params.applicantEmail;
+    const result = await appliedFile.find({ applicantEmail: email }).toArray();
+    res.send(result)
+  })
+  app.get('/alljobs/:postedPersonEmail/:id', async(req,res) => {
+    const email = req.params.postedPersonEmail;
+    const id = req.params.id
+    const queary = {_id: new ObjectId(id), postedPersonEmail: email}
+    const result = await jobsFile.findOne(queary)
+    res.send(result)
+  })
+  app.get('/jobs/:id', async(req,res) => {
+    const id = req.params.id
+    const queary = {_id: new ObjectId(id)}
+    const result = await jobsFile.findOne(queary)
+    res.send(result)
+  })
 
-app.get('/alljobs', async(req,res) => {
-    const jobs = await jobsFile.find().toArray();
-    res.send(jobs)
-})
-app.get('/appliedJob', async(req,res) => {
-  const jobs = await appliedFile.find().toArray();
-    res.send(jobs)
-})
-app.get('/jobs', async(req,res) => {
-    const jobs = await jobsFile.find().toArray();
-    res.send(jobs)
-})
-app.post('/alljobs', async(req,res) => {
-  const job = req.body;
-  const result = await jobsFile.insertOne(job)
-  res.send(result)
-})
-app.post('/appliedJob', async(req,res) => {
-  const job = req.body;
-  const result = await appliedFile.insertOne(job)
-  res.send(result)
-})
-app.get('/alljobs/:postedPersonEmail', verifyToken ,  async(req,res) => {
-  const email = req.params.postedPersonEmail;
-  const result = await jobsFile.find({ postedPersonEmail: email }).toArray();
-  res.send(result)
-})
-app.get('/appliedJob/:applicantEmail', async(req,res) => {
-  const email = req.params.applicantEmail;
-  const result = await appliedFile.find({ applicantEmail: email }).toArray();
-  res.send(result)
-})
-app.get('/alljobs/:postedPersonEmail/:id', async(req,res) => {
-  const email = req.params.postedPersonEmail;
-  const id = req.params.id
-  const queary = {_id: new ObjectId(id), postedPersonEmail: email}
-  const result = await jobsFile.findOne(queary)
-  res.send(result)
-})
-app.get('/jobs/:id', async(req,res) => {
-  const id = req.params.id
-  const queary = {_id: new ObjectId(id)}
-  const result = await jobsFile.findOne(queary)
-  res.send(result)
-})
-
-app.delete('/alljobs/:postedPersonEmail/:id', async(req,res) => {
-  const email = req.params.postedPersonEmail;
-  const id = req.params.id
-  const queary = {_id: new ObjectId(id), postedPersonEmail: email}
-  const result = await jobsFile.deleteOne(queary)
-  res.send(result)
-})
+  app.delete('/alljobs/:postedPersonEmail/:id', async(req,res) => {
+    const email = req.params.postedPersonEmail;
+    const id = req.params.id
+    const queary = {_id: new ObjectId(id), postedPersonEmail: email}
+    const result = await jobsFile.deleteOne(queary)
+    res.send(result)
+  })
 
 
 
-app.put('/alljobs/:postedPersonEmail/:id', async (req, res) => {
+  app.put('/alljobs/:postedPersonEmail/:id', async (req, res) => {
   const email = req.params.postedPersonEmail;
   const id = req.params.id;
   const product = req.body;

@@ -1,10 +1,18 @@
 const express = require('express')
 const cors = require('cors')
+const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
 const app = express()
 const port = process.env.PORT || 5000 ;
 require('dotenv').config()
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+  ],
+  credentials: true,
+}))
+app.use(cookieParser())
 app.use(express.json())
-app.use(cors())
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -21,6 +29,8 @@ const client = new MongoClient(uri, {
 
 const jobsFile = client.db('JobsFile').collection('JobsCollection')
 const appliedFile = client.db('appliedFile').collection('appliedCollection')
+
+
 
 app.get('/alljobs', async(req,res) => {
     const jobs = await jobsFile.find().toArray();
@@ -106,7 +116,19 @@ app.put('/alljobs/:postedPersonEmail/:id', async (req, res) => {
       }
       }
       const result = await jobsFile.updateOne(filter,update,options)
-  res.send(result)
+        res.send(result)
+      })
+
+      app.post('/jwt' , async(req,res) => {
+        const user = req.body;
+        const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{
+          expiresIn: '1h'
+        })
+        res.cookie('token', token,{
+          httpOnly: true,
+          secure: true
+        } )
+        .send({massage : true})
       })
 
 
